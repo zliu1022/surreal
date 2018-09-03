@@ -1,6 +1,10 @@
+# On numbers and games
+# J. H. CONWAY
+# reprinted with corrections 1977
 import re
 import exceptions
 
+# use dictionary map surreal to real numbers and vesa
 dali2s={}
 def dali(x):
     for s in dali2s:
@@ -37,8 +41,8 @@ def shorthand(raw):
 
     # Check if input is integer
     # obselete
-    if string.isdigit():
-        return dali(int(string))
+    #if string.isdigit():
+    #    return dali(int(string))
 
     # Check string for the {L|R} syntax
     m = re.match(r'^{(.*)\|(.*)}$', string)
@@ -58,13 +62,16 @@ class BadlyFormed(exceptions.Exception):
 
 class Surreal(object):
     """
-    Surreal number
+    number
     """
     def __init__(self, leftSet, rightSet):
-        # If leftSet and rightSet are any two sets of numbers,
-        # and no member of leftSet>= any member of rightSet
-        # then there is a number {leftSet|rightSet}
-        # ps. don't check is_well_formed or not, so it can also init pseudo number
+        '''
+          If leftSet and rightSet are any two sets of numbers,
+          and no member of leftSet>= any member of rightSet
+          then there is a number {leftSet|rightSet}
+          ONAG, Page 4
+          ps. don't check is_well_formed or not, so it can also init pseudo number
+        '''
         self._is_well_formed(leftSet, rightSet)
         self.leftSet = leftSet
         self.rightSet = rightSet
@@ -75,45 +82,70 @@ class Surreal(object):
         for r in rightSet:
             for l in leftSet:
                 if r <= l : 
-                    #print "pseudo: L %s >= R %s, broke Atom1" % (leftSet, rightSet)
+                    self.pseudo = True
                     return False
+        self.pseudo = False
         return True
 
     def __len__(self):
         return 1
 
     def __le__(self, other):
-        #We say x>=y if and only if no member in x.rightSet<=y and no member in y.leftSet>=x
-        #print '+++'
-        if len(self.leftSet)==0 and len(other.rightSet)==0: 
-            #print 'True: leftSet and rightSet are empty'
-            #print '---'
-            return True
+        # We say x>=y if and only if no member in x.rightSet<=y and no member in y.leftSet>=x
+        # and x<=y if and only if y>=x
+        # ONAG, Page 4
 
         if len(self.leftSet)!=0:
             for s in self.leftSet:
-                if other <= s:
-                    #print 'False: other<=self.leftSet', other, '<=', s
-                    #print '---'
+                if s >= other:
+                    #print 'False: self.leftSet>=other', s, '>=', other
                     return False
                 else:
-                    #print 'True: other not <=self.leftSet', other, 'not<=', s
-                    pass
+                    continue
         if len(other.rightSet)!=0:
             for s in other.rightSet:
-                if s <= self:
-                    #print 'False: other.rightSet<=self', s, '<=', self
-                    #print '---'
+                if self >= s:
+                    #print 'False: self>=other.rightSet', self, '>=', s
                     return False
                 else:
-                    #print 'True: other.rightSet not <=self', s, 'not<=', self
-                    pass
-        #print 'True: no self.leftSet>=other and no other.rightSet<=self'
-        #print '---'
+                    continue
+        return True
+
+    def __ge__(self, other):
+        # We say x>=y if and only if no member in x.rightSet<=y and no member in y.leftSet>=x
+        # and x<=y if and only if y>=x
+        # ONAG, Page 4
+
+        if len(self.rightSet)!=0:
+            for s in self.rightSet:
+                if s <= other:
+                    #print 'False: self.rightSet<=other', s, '<=', other
+                    return False
+                else:
+                    continue
+        if len(other.leftSet)!=0:
+            for s in other.leftSet:
+                if self <= s:
+                    #print 'False: self<=other.leftSet', self, '<=', s
+                    return False
+                else:
+                    continue
         return True
 
     def __eq__(self, other):
-        return self <= other and other <= self
+        '''
+          Definition of x=y, x>y, x<y
+          x=y iff (x>=y and y>=x)
+          x>y iff (x>=y and y not>= x)
+          x<y iff y>x
+          ps. We write x not<= y to mean that x<=y does not hold
+          ONAG, Page 4
+        '''
+        return self <= other and self >= other
+    def __gt__(self, other):
+        return self>=other and not(other>=self)
+    def __lt__(self, other):
+        return other>self
 
     def __repr__(self):
         if len(self.leftSet)==0 and len(self.rightSet)==0:
@@ -123,71 +155,31 @@ class Surreal(object):
         if len(self.rightSet)==0:
             return 'S{ %s| }' % self.leftSet
         return 'S{ %s | %s }' % (self.leftSet, self.rightSet)
-        if hasattr(self.leftSet,'dali') and hasattr(self.rightSet,'dali'):
-            if self.leftSet.dali == 'unknown' and self.rightSet.dali == 'unknown':
-                return 'S{ %s | %s }' % (self.leftSet, self.rightSet)
-            if self.leftSet.dali == 'unknown' and self.rightSet.dali != 'unknown':
-                return 'S{ %s | %d }' % (self.leftSet, self.rightSet.dali)
-            if self.leftSet.dali != 'unknown' and self.rightSet.dali == 'unknown':
-                return 'S{ %d | %s }' % (self.leftSet.dali, self.rightSet)
-            return 'S{ %d| %d }' % (self.leftSet.dali, self.rightSet.dali)
-
-        if hasattr(self.leftSet,'dali') and hasattr(self.rightSet,'dali')==False:
-            if self.leftSet.dali == 'unknown' :
-                return 'S{ %s| }' % (self.leftSet)
-            return 'S{ %d| }' % (self.leftSet.dali)
-
-        if hasattr(self.leftSet,'dali')==False and hasattr(self.rightSet,'dali'):
-            if self.rightSet.dali == 'unknown' :
-                return 'S{ |%s }' % (self.rightSet)
-            return 'S{ |%d }' % (self.rightSet.dali)
-
-        if hasattr(self.leftSet,'dali')==False and hasattr(self.rightSet,'dali')==False:
-            return 'S{ | }'
 
     def __add__(self, other):
+        '''
+          Definition of x+y
+          x+y = { x.leftSet+y, x+y.leftSet| x.rightSet+y, x+y.rightSet}
+        '''
         leftSet = set()
         rightSet = set()
         if len(self.leftSet)!=0 :
             for s in self.leftSet:
                 tmp = s+other
-                if len(leftSet)!=0 :
-                    found=0
-                    for l in leftSet:
-                        if l == tmp: found=1
-                    if found==0: leftSet.add(tmp)
-                else:
-                    leftSet.add(tmp)
+                leftSet.add(tmp)
         if len(other.leftSet)!=0 :
             for s in other.leftSet:
                 tmp = self+s
-                if len(leftSet)!=0 :
-                    found=0
-                    for l in leftSet:
-                        if l == tmp: found=1
-                    if found==0: leftSet.add(tmp)
-                else:
-                    leftSet.add(tmp)
+                leftSet.add(tmp)
         if len(self.rightSet)!=0 :
             for s in self.rightSet:
                 tmp = s+other
-                if len(rightSet)!=0 :
-                    found=0
-                    for r in rightSet:
-                        if r == tmp: found=1
-                    if found==0: rightSet.add(tmp)
-                else:
-                    rightSet.add(tmp)
+                rightSet.add(tmp)
         if len(other.rightSet)!=0 :
             for s in other.rightSet:
                 tmp = self+s
-                if len(rightSet)!=0 :
-                    found=0
-                    for r in rightSet:
-                        if r == tmp: found=1
-                    if found==0: rightSet.add(tmp)
-                else:
-                    rightSet.add(tmp)
+                rightSet.add(tmp)
+        #return Surreal(leftSet, rightSet)
         return Surreal.simplify(Surreal(leftSet, rightSet))
 
     def __neg__(self):
@@ -245,6 +237,7 @@ class Surreal(object):
         return 
 
     def simplify(self):
+        if hasattr(self,'pseudo')==True: return self
         leftSet = set()
         rightSet = set()
         if len(self.leftSet)!=0:
@@ -257,8 +250,7 @@ class Surreal(object):
                 if max<=s:
                     #print 's>=max'
                     max = s
-            max=Surreal.simplify(max)
-            leftSet.add(max)
+            leftSet.add(Surreal.simplify(max))
         if len(self.rightSet)!=0:
             i=0
             for s in self.rightSet:
