@@ -41,8 +41,8 @@ def shorthand(raw):
 
     # Check if input is integer
     # obselete
-    #if string.isdigit():
-    #    return dali(int(string))
+    if string.isdigit():
+        return dali(int(string))
 
     # Check string for the {L|R} syntax
     m = re.match(r'^{(.*)\|(.*)}$', string)
@@ -233,8 +233,32 @@ class Surreal(object):
                         if found==0: leftSet.add(s)
         return Surreal.simplify(Surreal(leftSet, rightSet))
 
-    def __truediv__(self, other):
-        return 
+    def mul_inverse(self, num=1):
+        zero = Surreal(set(),set())
+        one = Surreal(set([zero]),set())
+
+        leftSet = set()
+        leftSet.add(zero)
+        rightSet = set()
+        for i in range(0,num):
+            for v in self.leftSet:
+                for l in leftSet:
+                    rightSet.add((one+(v-self)*l)*Surreal.mul_inverse(v))
+            for u in self.rightSet:
+                for r in rightSet:
+                    rightSet.add((one+(u-self)*r)*Surreal.mul_inverse(u))
+
+            for u in self.rightSet:
+                for l in leftSet:
+                    leftSet.add((one+(u-self)*l)*Surreal.mul_inverse(u))
+            for v in self.leftSet:
+                for r in rightSet:
+                    leftSet.add((one+(v-self)*r)*Surreal.mul_inverse(v))
+        return Surreal(leftSet, rightSet)
+
+    def __div__(self, other):
+        # failed!
+        return
 
     def simplify(self):
         if hasattr(self,'pseudo')==True: return self
