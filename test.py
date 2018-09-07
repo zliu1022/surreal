@@ -94,20 +94,27 @@ rightSet = set()
 h=Surreal(leftSet, rightSet)
 add_dali(h, 3)
 add_dali(-h, -3)
+
+i=Surreal(set([h]), set())
+add_dali(i, 4)
+add_dali(-i, -4)
+
 print 'e = {0|1/2} = 1/4', e
 print 'f = {1/2|1} = 3/4', f
 print 'g = { 1|2 } = 3/2', g
 print 'h = { 2|  } = 3', h
+print 'i = { 3|  } = 4', i
 print 'You can verify here, as 1/4+1/4==1/2, {1/2|2}==1', e+e==c, Surreal(set([c]),set([d]))==r
 x=Surreal(set([c]),set([r+c]))
 print 'verify: x = { 1/2, 1+1/2 }=', x==r, 'dali(x)=', dali(x)
 
 print
 print 'Surreal numbers summary:'
-print 'day0:                     0,a'
-print 'day1:         -1,b                       1,r'
-print 'day2:    -2,       -1/2,        1/2,c          2,d'
-print 'day3: -3, -3/2, -3/4, -1/4, 1/4,e  3/4,f   3/2,g  3,h'
+print 'day0:                         0,a'
+print 'day1:             -1,b                       1,r'
+print 'day2:        -2,       -1/2,        1/2,c          2,d'
+print 'day3:     -3, -3/2, -3/4, -1/4, 1/4,e  3/4,f   3/2,g  3,h'
+print 'day4: -4,                                                 4,i'
 print 'dali(c+r)', dali(c+r)
 print 'dali(c+g)', dali(c+g)
 print 'dali(e+f)', dali(e+f)
