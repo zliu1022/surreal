@@ -1,7 +1,8 @@
+
 # surreal
 
-# verify Conway's number principle include pseudo number
-# python 2.7
+* verify Conway's number principle include pseudo number
+* python 2.7
 
 # know issues
 1. very slow when add or mutiple many simple number
