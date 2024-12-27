@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # On numbers and games
 # J. H. CONWAY
 # reprinted with corrections 1977
