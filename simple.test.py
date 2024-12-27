@@ -1,4 +1,4 @@
-coding=utf-8
+# -*- coding: utf-8 -*-
 from surreal import *
 
 a=Surreal(set(),set())           # {|}       0
